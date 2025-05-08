@@ -1,0 +1,65 @@
+name: build-test-deploy
+on: push
+jobs:
+  build-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      - name: install dependencies
+        run: npm install
+      - name: build application
+        run: npm run build
+  test-job:
+    needs: build-job
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      - name: install dependencies
+        run: npm install
+      - name: test application
+        run: npm test
+  deploy-job:
+    needs: build-job
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout 
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      - name: install dependencies
+        run: npm install
+      - name: build application
+        run: npm run build
+      - name: configure pages
+        uses: action/configure-pages@v5
+        with:
+          static_site_generator: next
+      - name: upload website
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./out"
+      - name: deploy
+        id: deploy
+        uses: actions/deploy-pages@v4
+      
