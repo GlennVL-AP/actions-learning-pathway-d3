@@ -52,7 +52,7 @@ jobs:
       - name: build application
         run: npm run build
       - name: configure pages
-        uses: action/configure-pages@v5
+        uses: actions/configure-pages@v5
         with:
           static_site_generator: next
       - name: upload website
